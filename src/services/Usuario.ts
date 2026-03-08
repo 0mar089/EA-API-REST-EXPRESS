@@ -1,12 +1,19 @@
 import mongoose from 'mongoose';
 import Usuario, { IUsuarioModel, IUsuario } from '../models/Usuario';
+import OrganizacionService from './Organizacion';
 
 const createUsuario = async (data: Partial<IUsuario>): Promise<IUsuarioModel> => {
     const usuario = new Usuario({
         _id: new mongoose.Types.ObjectId(),
         ...data
     });
-    return await usuario.save();
+    const savedUsuario = await usuario.save();
+
+    if (savedUsuario.organizacion) {
+        await OrganizacionService.addUsuarioToOrganizacion(savedUsuario.organizacion, savedUsuario._id);
+    }
+
+    return savedUsuario;
 };
 
 const getUsuario = async (usuarioId: string): Promise<IUsuarioModel | null> => {
@@ -19,15 +26,29 @@ const getAllUsuarios = async (): Promise<IUsuarioModel[]> => {
 
 const updateUsuario = async (usuarioId: string, data: Partial<IUsuario>): Promise<IUsuarioModel | null> => {
     const usuario = await Usuario.findById(usuarioId);
-    if (usuario) {
-        usuario.set(data);
-        return await usuario.save();
+    if (!usuario) return null;
+
+    const oldOrganizacion = usuario.organizacion;
+    usuario.set(data);
+    const updatedUsuario = await usuario.save();
+
+    if (data.organizacion && String(oldOrganizacion) !== String(data.organizacion)) {
+        if (oldOrganizacion) {
+            await OrganizacionService.removeUsuarioFromOrganizacion(oldOrganizacion, updatedUsuario._id);
+        }
+        await OrganizacionService.addUsuarioToOrganizacion(data.organizacion, updatedUsuario._id);
     }
-    return null;
+
+    return updatedUsuario;
 };
 
 const deleteUsuario = async (usuarioId: string): Promise<IUsuarioModel | null> => {
-    return await Usuario.findByIdAndDelete(usuarioId);
+    const deletedUsuario = await Usuario.findByIdAndDelete(usuarioId);
+
+    if (deletedUsuario && deletedUsuario.organizacion) {
+        await OrganizacionService.removeUsuarioFromOrganizacion(deletedUsuario.organizacion, deletedUsuario._id);
+    }
+    return deletedUsuario;
 };
 
 export default { createUsuario, getUsuario, getAllUsuarios, updateUsuario, deleteUsuario };

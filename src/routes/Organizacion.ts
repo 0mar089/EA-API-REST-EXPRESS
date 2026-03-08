@@ -85,6 +85,31 @@ router.get('/:organizacionId', controller.readOrganizacion);
 
 /**
  * @openapi
+ * /organizaciones/{organizacionId}/users:
+ *   get:
+ *     summary: Obtiene los usuarios de una organización por ID
+ *     tags: [Organizaciones]
+ *     parameters:
+ *       - in: path
+ *         name: organizacionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ObjectId de la organización
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Organizacion'
+ *       404:
+ *         description: No encontrado
+ */
+router.get('/:organizacionId/users', controller.readOrganizacionUsers);
+
+/**
+ * @openapi
  * /organizaciones:
  *   get:
  *     summary: Lista todas las organizaciones

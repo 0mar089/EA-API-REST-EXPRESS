@@ -20,6 +20,15 @@ const readOrganizacion = async (req: Request, res: Response, next: NextFunction)
     }
 };
 
+const readOrganizacionUsers = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organizacion = await OrganizacionService.getOrganizacionUsers(req.params.organizacionId);
+        return organizacion ? res.status(200).json(organizacion.usuarios) : res.status(404).json({ message: 'not found' });
+    } catch (error) {
+        return res.status(500).json({ error });
+    }
+};
+
 const readAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const organizaciones = await OrganizacionService.getAllOrganizaciones();
@@ -51,4 +60,4 @@ const deleteOrganizacion = async (req: Request, res: Response, next: NextFunctio
     }
 };
 
-export default { createOrganizacion, readOrganizacion, readAll, updateOrganizacion, deleteOrganizacion };
+export default { createOrganizacion, readOrganizacion, readOrganizacionUsers, readAll, updateOrganizacion, deleteOrganizacion };
