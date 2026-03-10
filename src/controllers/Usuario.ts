@@ -3,8 +3,6 @@ import mongoose from 'mongoose';
 import UsuarioService from '../services/Usuario';
 
 const createUsuario = async (req: Request, res: Response, next: NextFunction) => {
-   
-
     try {
        const savedUsuario = await UsuarioService.createUsuario(req.body);
         return res.status(201).json(savedUsuario);

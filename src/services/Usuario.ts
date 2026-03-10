@@ -10,6 +10,7 @@ const createUsuario = async (data: Partial<IUsuario>): Promise<IUsuarioModel> =>
     const savedUsuario = await usuario.save();
 
     if (savedUsuario.organizacion) {
+        // Agregar Usuario a una Organizacion
         await OrganizacionService.addUsuarioToOrganizacion(savedUsuario.organizacion, savedUsuario._id);
     }
 
@@ -34,8 +35,10 @@ const updateUsuario = async (usuarioId: string, data: Partial<IUsuario>): Promis
 
     if (data.organizacion && String(oldOrganizacion) !== String(data.organizacion)) {
         if (oldOrganizacion) {
+            // Eliminar Usuario de la Organizacion anterior
             await OrganizacionService.removeUsuarioFromOrganizacion(oldOrganizacion, updatedUsuario._id);
         }
+        // Agregar Usuario a la nueva Organizacion
         await OrganizacionService.addUsuarioToOrganizacion(data.organizacion, updatedUsuario._id);
     }
 
@@ -46,6 +49,7 @@ const deleteUsuario = async (usuarioId: string): Promise<IUsuarioModel | null> =
     const deletedUsuario = await Usuario.findByIdAndDelete(usuarioId);
 
     if (deletedUsuario && deletedUsuario.organizacion) {
+        // Eliminar Usuario de la Organizacion
         await OrganizacionService.removeUsuarioFromOrganizacion(deletedUsuario.organizacion, deletedUsuario._id);
     }
     return deletedUsuario;
